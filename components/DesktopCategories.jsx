@@ -16,7 +16,7 @@ export default function DesktopCategories({ categories }) {
           {categories.map((category, index) => (
             <li key={index} className="h-full flex items-center">
               <button
-                onClick={() => navigateTo(category.name) }
+                onClick={() => navigateTo(category.name) } key={c.name}
                 className="px-4 h-full hover:bg-teal-600 transition flex items-center"
               >
                 {category.name}
