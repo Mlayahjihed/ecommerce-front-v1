@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function DesktopCategories({ categories }) {
   const router = useRouter();
@@ -10,14 +10,9 @@ export default function DesktopCategories({ categories }) {
     const normalizedCategory = encodeURIComponent(categoryName.toLowerCase());
     const currentCategory = pathname.split('/').pop();
     
-    // Ne pas naviguer si déjà sur la même catégorie
     if (currentCategory === normalizedCategory) return;
 
-    // URL de base sans paramètres de filtre
-    const baseUrl = `/products/all/${normalizedCategory}`;
-    
-    // Utiliser replace au lieu de push pour éviter l'accumulation dans l'historique
-    router.replace(baseUrl);
+    router.replace(`/products/all/${normalizedCategory}?minPrice=0&maxPrice=999999&page=1`);
   };
 
   return (
