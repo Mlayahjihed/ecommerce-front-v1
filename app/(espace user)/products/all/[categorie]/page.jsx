@@ -56,7 +56,20 @@ useEffect(() => {
   setSelectedSousCategorie(urlSousCategorie || null);
 }, [searchParams]);
 
+const [lastCategory, setLastCategory] = useState(null);
 
+useEffect(() => {
+  if (categorie && categorie !== lastCategory) {
+    // Réinitialiser tous les états quand la catégorie change
+    setSelectedMarques([]);
+    setMinPrice(0);
+    setMaxPrice(999999);
+    setPage(1);
+    setSelectedTitles([]);
+    setSelectedSousCategorie(null);
+    setLastCategory(categorie);
+  }
+}, [categorie]);
 
   useEffect(() => {
     const fetchData = async () => {
