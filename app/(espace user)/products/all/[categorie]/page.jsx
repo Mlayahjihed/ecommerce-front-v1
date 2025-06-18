@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Filter, X } from "lucide-react";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import Shoppincart2 from "@/components/shoppincart";
 import { ClipLoader } from "react-spinners";
 
 export default function CardsPage() {
+  // États
   const [marques, setMarques] = useState([]);
   const [selectedMarques, setSelectedMarques] = useState([]);
   const { categorie } = useParams();
@@ -26,109 +27,97 @@ export default function CardsPage() {
   const [selectedSousCategorie, setSelectedSousCategorie] = useState(null);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [loading, setLoading] = useState(true);
-  // Initialiser les états avec les paramètres d'URL
+  const [isInitialized, setIsInitialized] = useState(false);
 
-useEffect(() => {
-  const urlMarques = searchParams.getAll('marqueId');
-  const urlMinPrice = searchParams.get('minPrice');
-  const urlMaxPrice = searchParams.get('maxPrice');
-  const urlTitles = searchParams.getAll('title');
-  const urlSousCategorie = searchParams.get('sousCategorieId');
-  const urlPage = searchParams.get('page');
-
-  // Vérifiez si les paramètres existent avant de mettre à jour l'état
-  if (urlMarques.length > 0) {
-    setSelectedMarques(urlMarques);
-  } else {
-    setSelectedMarques([]); // Réinitialiser si absent
-  }
-
-  setMinPrice(urlMinPrice ? Math.max(parseFloat(urlMinPrice), 0) : 0);
-  setMaxPrice(urlMaxPrice ? Math.min(parseFloat(urlMaxPrice), 999999) : 999999);
-  setPage(urlPage ? Math.max(parseInt(urlPage), 1) : 1);
-  
-  if (urlTitles.length > 0) {
-    setSelectedTitles(urlTitles);
-  } else {
-    setSelectedTitles([]);
-  }
-
-  setSelectedSousCategorie(urlSousCategorie || null);
-}, [searchParams]);
-
-const [lastCategory, setLastCategory] = useState(null);
-
-useEffect(() => {
-  if (categorie && categorie !== lastCategory) {
-    // Réinitialiser tous les états quand la catégorie change
-    setSelectedMarques([]);
-    setMinPrice(0);
-    setMaxPrice(999999);
-    setPage(1);
-    setSelectedTitles([]);
-    setSelectedSousCategorie(null);
-    setLastCategory(categorie);
-  }
-}, [categorie]);
-
+  // Initialisation des états à partir des paramètres URL
   useEffect(() => {
-    const fetchData = async () => {
+    if (isInitialized) return;
 
+    const params = new URLSearchParams(window.location.search);
+    
+    setMinPrice(Number(params.get('minPrice')) || 0);
+    setMaxPrice(Number(params.get('maxPrice')) || 999999);
+    setPage(Number(params.get('page')) || 1);
+    setSelectedMarques(params.getAll('marqueId'));
+    setSelectedTitles(params.getAll('title'));
+    setSelectedSousCategorie(params.get('sousCategorieId'));
+    
+    setIsInitialized(true);
+  }, [isInitialized]);
+
+  // Fetch des données
+  const fetchData = useCallback(async () => {
+    if (!isInitialized) return;
+
+    setLoading(true);
+    try {
       const queryParams = new URLSearchParams({
-        page,
-        minPrice,
-        maxPrice,
-        ...(selectedSousCategorie && { sousCategorieId: selectedSousCategorie }),
+        page: page.toString(),
+        minPrice: minPrice.toString(),
+        maxPrice: maxPrice.toString(),
+        ...(selectedSousCategorie && { sousCategorieId: selectedSousCategorie.toString() }),
       });
-      selectedTitles.forEach((t) => queryParams.append("title", t));
-      selectedMarques.forEach((m) => queryParams.append("marqueId", m));
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/produits/by-category/${categorie}?${queryParams.toString()}`);
+
+      selectedTitles.forEach(t => queryParams.append("title", t));
+      selectedMarques.forEach(m => queryParams.append("marqueId", m));
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/produits/by-category/${categorie}?${queryParams.toString()}`
+      );
       const data = await res.json();
+
       setMarques(data.marques || []);
       setProduits(data.produits || []);
       setTitres(data.titres || []);
       setSousCategories(data.sousCategories || []);
       setPrixMin(data.prixMin || 0);
-      setPrixMax(data.prixMax || 1000);
+      setPrixMax(data.prixMax || 999999);
       setTotalPages(data.totalPages || 1);
-      updateURL();
-      setLoading(false);
-    };
 
-    if (categorie) {
-      fetchData();
+      // Mise à jour conditionnelle de l'URL
+      updateURL(queryParams);
+    } catch (error) {
+      console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [categorie, minPrice, maxPrice, selectedTitles, selectedMarques, selectedSousCategorie, page]);
-  const toggleMarque = (id) => {
-    setSelectedMarques(prev =>
+  }, [categorie, minPrice, maxPrice, selectedTitles, selectedMarques, selectedSousCategorie, page, isInitialized]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Mise à jour de l'URL
+  const updateURL = useCallback((queryParams) => {
+    const currentParams = new URLSearchParams(window.location.search);
+    if (currentParams.toString() !== queryParams.toString()) {
+      router.replace(`/products/all/${categorie}?${queryParams.toString()}`, { scroll: false });
+    }
+  }, [categorie, router]);
+
+  // Gestion des filtres
+  const toggleMarque = useCallback((id) => {
+    setSelectedMarques(prev => 
       prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]
     );
-  };
-  const toggleTitle = (title) => {
-    setSelectedTitles((prev) =>
-      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
+    setPage(1);
+  }, []);
+
+  const toggleTitle = useCallback((title) => {
+    setSelectedTitles(prev =>
+      prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]
     );
-  };
+    setPage(1);
+  }, []);
 
-  const handleMinChange = (e) => {
-    const val = parseFloat(e.target.value);
-    if (val <= maxPrice) setMinPrice(val);
-  };
-
-  const handleMaxChange = (e) => {
-    const val = parseFloat(e.target.value);
-    if (val >= minPrice) setMaxPrice(val);
-  };
-
-  const handleSousCategorieChange = (id) => {
+  const handleSousCategorieChange = useCallback((id) => {
     setSelectedSousCategorie(id);
     setSelectedTitles([]);
-    setMinPrice(prixMin);
-    setMaxPrice(prixMax);
-  };
+    setPage(1);
+  }, []);
 
-  // Construire le lien produit correctement formaté
-  const buildProductLink = (productId) => {
+  // Construction des liens produits
+  const buildProductLink = useCallback((productId) => {
     const params = new URLSearchParams();
     params.set('minPrice', minPrice);
     params.set('maxPrice', maxPrice);
@@ -144,29 +133,33 @@ useEffect(() => {
         ...Object.fromEntries(params)
       }
     };
-  };
+  }, [minPrice, maxPrice, page, selectedMarques, selectedTitles, selectedSousCategorie, categorie]);
+const handleMinChange = useCallback((e) => {
+    const val = parseFloat(e.target.value);
+    if (!isNaN(val) && val <= maxPrice) {
+      setMinPrice(val);
+      setPage(1); // Reset à la première page quand le filtre change
+    }
+  }, [maxPrice]);
 
-  // Mettre à jour l'URL actuelle
-  const updateURL = () => {
-    const params = new URLSearchParams();
-    params.set('minPrice', minPrice);
-    params.set('maxPrice', maxPrice);
-    params.set('page', page);
-    selectedTitles.forEach(t => params.append('title', t));
-    selectedMarques.forEach(m => params.append('marqueId', m));
-    if (selectedSousCategorie) params.set('sousCategorieId', selectedSousCategorie);
+  const handleMaxChange = useCallback((e) => {
+    const val = parseFloat(e.target.value);
+    if (!isNaN(val) && val >= minPrice) {
+      setMaxPrice(val);
+      setPage(1); // Reset à la première page quand le filtre change
+    }
+  }, [minPrice]);
 
-    router.replace(`/products/all/${categorie}?${params.toString()}`, { scroll: false });
-  };
-  if (loading) {
-    return <div className="min-h-screen bg-white p-6">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex justify-center items-center h-screen">
-          <ClipLoader color="#14b8a6" loading={loading} size={50} />
+  if (loading ) {
+    return (
+      <div className="min-h-screen bg-white p-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex justify-center items-center h-screen">
+            <ClipLoader color="#14b8a6" loading={true} size={50} />
+          </div>
         </div>
       </div>
-
-    </div>;
+    );
   }
   return (
     <div className="flex flex-col sm:flex-row min-h-screen relative">
