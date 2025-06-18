@@ -237,14 +237,20 @@ export default function CardsPage() {
             max={prixMax}
             defaultValue={[minPrice, maxPrice]}
             value={[minPrice, maxPrice]}
-            onChange={([min, max]) => {
-              setMinPrice(min);
-              setMaxPrice(max);
-            }}
-            onChangeComplete={([min, max]) => {
-              setMinPrice(min);
-              setMaxPrice(max);
-            }}
+            onChange={(value) => {
+  if (Array.isArray(value)) {
+    const [min, max] = value;
+    setMinPrice(min);
+    setMaxPrice(max);
+  }
+}}
+onChangeComplete={(value) => {
+  if (Array.isArray(value)) {
+    const [min, max] = value;
+    setMinPrice(min);
+    setMaxPrice(max);
+  }
+}}
             trackStyle={[{ backgroundColor: "#14b8a6" }]} // teal-500
             handleStyle={[
               { borderColor: "#14b8a6", backgroundColor: "#14b8a6" },
