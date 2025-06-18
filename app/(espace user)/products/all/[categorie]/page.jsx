@@ -6,8 +6,7 @@ import { Filter, X } from "lucide-react";
 import Link from "next/link";
 import Shoppincart2 from "@/components/shoppincart";
 import { ClipLoader } from "react-spinners";
-import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
+
 export default function CardsPage() {
   const [marques, setMarques] = useState([]);
   const [selectedMarques, setSelectedMarques] = useState([]);
@@ -35,32 +34,25 @@ export default function CardsPage() {
     const urlTitles = searchParams.getAll('title');
     const urlSousCategorie = searchParams.get('sousCategorieId');
     const urlPage = searchParams.get('page');
-
-    // Only update state if URL params exist
     if (urlMarques.length > 0) setSelectedMarques(urlMarques);
-    if (urlMinPrice) setMinPrice(Math.max(parseFloat(urlMinPrice), prixMin));
-    if (urlMaxPrice) setMaxPrice(Math.min(parseFloat(urlMaxPrice), prixMax));
+    if (urlMinPrice) setMinPrice(parseFloat(urlMinPrice));
+    if (urlMaxPrice) setMaxPrice(parseFloat(urlMaxPrice));
     if (urlPage) setPage(parseInt(urlPage));
     if (urlTitles.length > 0) setSelectedTitles(urlTitles);
     if (urlSousCategorie) setSelectedSousCategorie(urlSousCategorie);
-  }, [searchParams]);
-  
-  useEffect(() => {
-    setMinPrice(prixMin);
-    setMaxPrice(prixMax);
-  }, [prixMin, prixMax]);
+  }, []);
+
 
 
   useEffect(() => {
     const fetchData = async () => {
 
       const queryParams = new URLSearchParams({
-        page: page.toString(),
-        minPrice: minPrice.toString(),
-        maxPrice: maxPrice.toString(),
-        ...(selectedSousCategorie && { sousCategorieId: selectedSousCategorie.toString() }),
+        page,
+        minPrice,
+        maxPrice,
+        ...(selectedSousCategorie && { sousCategorieId: selectedSousCategorie }),
       });
-
       selectedTitles.forEach((t) => queryParams.append("title", t));
       selectedMarques.forEach((m) => queryParams.append("marqueId", m));
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/produits/by-category/${categorie}?${queryParams.toString()}`);
@@ -70,7 +62,7 @@ export default function CardsPage() {
       setTitres(data.titres || []);
       setSousCategories(data.sousCategories || []);
       setPrixMin(data.prixMin || 0);
-      setPrixMax(data.prixMax || 999999);
+      setPrixMax(data.prixMax || 1000);
       setTotalPages(data.totalPages || 1);
       updateURL();
       setLoading(false);
@@ -92,25 +84,20 @@ export default function CardsPage() {
   };
 
   const handleMinChange = (e) => {
-    const val = Number(e.target.value);
-    if (!isNaN(val) && val <= maxPrice) {
-      setMinPrice(val);
-    }
+    const val = parseFloat(e.target.value);
+    if (val <= maxPrice) setMinPrice(val);
   };
 
   const handleMaxChange = (e) => {
-    const val = Number(e.target.value);
-    if (!isNaN(val) && val >= minPrice) {
-      setMaxPrice(val);
-    }
+    const val = parseFloat(e.target.value);
+    if (val >= minPrice) setMaxPrice(val);
   };
-
-
 
   const handleSousCategorieChange = (id) => {
     setSelectedSousCategorie(id);
     setSelectedTitles([]);
-
+    setMinPrice(prixMin);
+    setMaxPrice(prixMax);
   };
 
   // Construire le lien produit correctement formaté
@@ -135,9 +122,9 @@ export default function CardsPage() {
   // Mettre à jour l'URL actuelle
   const updateURL = () => {
     const params = new URLSearchParams();
-    params.set("minPrice", minPrice.toString());
-    params.set("maxPrice", maxPrice.toString());
-    params.set("page", page.toString());
+    params.set('minPrice', minPrice);
+    params.set('maxPrice', maxPrice);
+    params.set('page', page);
     selectedTitles.forEach(t => params.append('title', t));
     selectedMarques.forEach(m => params.append('marqueId', m));
     if (selectedSousCategorie) params.set('sousCategorieId', selectedSousCategorie);
@@ -232,40 +219,28 @@ export default function CardsPage() {
           </div>
         </div>
 
-        <div className="border rounded-lg border-teal-400 p-2">
-          <h3 className="font-medium mb-2">Prix</h3>
-          <Slider
-            range
+        {/* Prix */}
+        <div>
+          <h3 className="font-medium mb-1">Prix</h3>
+          <input
+            type="range"
             min={prixMin}
             max={prixMax}
-            defaultValue={[minPrice, maxPrice]}
-            value={[minPrice, maxPrice]}
-            onChange={(value) => {
-  if (Array.isArray(value)) {
-    const [min, max] = value;
-    setMinPrice(min);
-    setMaxPrice(max);
-  }
-}}
-onChangeComplete={(value) => {
-  if (Array.isArray(value)) {
-    const [min, max] = value;
-    setMinPrice(min);
-    setMaxPrice(max);
-  }
-}}
-            trackStyle={[{ backgroundColor: "#14b8a6" }]} // teal-500
-            handleStyle={[
-              { borderColor: "#14b8a6", backgroundColor: "#14b8a6" },
-              { borderColor: "#14b8a6", backgroundColor: "#14b8a6" },
-            ]}
+            value={minPrice}
+            onChange={handleMinChange}
+            className="w-full accent-teal-500"
           />
-          <div className="flex justify-between text-sm text-gray-700 mt-2">
-            <span>Min: {minPrice} €</span>
-            <span>Max: {maxPrice} €</span>
-          </div>
+          <p className="text-sm text-gray-700">Min: {minPrice} €</p>
+          <input
+            type="range"
+            min={prixMin}
+            max={prixMax}
+            value={maxPrice}
+            onChange={handleMaxChange}
+            className="w-full accent-teal-500 mt-2"
+          />
+          <p className="text-sm text-gray-700">Max: {maxPrice} €</p>
         </div>
-
       </aside>
 
       {/* Mobile Filter Button */}
@@ -362,28 +337,27 @@ onChangeComplete={(value) => {
               </div>
             </div>
 
-            <div className="border rounded-lg border-teal-400 p-2">
-              <h3 className="font-medium mb-2">Prix</h3>
-              <Slider
-                range
+            {/* Prix */}
+            <div>
+              <h3 className="font-medium mb-1">Prix</h3>
+              <input
+                type="range"
                 min={prixMin}
                 max={prixMax}
-                defaultValue={[minPrice, maxPrice]}
-                value={[minPrice, maxPrice]}
-                onChange={([min, max]) => {
-                  setMinPrice(min);
-                  setMaxPrice(max);
-                }}
-                trackStyle={[{ backgroundColor: "#14b8a6" }]} // teal-500
-                handleStyle={[
-                  { borderColor: "#14b8a6", backgroundColor: "#14b8a6" },
-                  { borderColor: "#14b8a6", backgroundColor: "#14b8a6" },
-                ]}
+                value={minPrice}
+                onChange={handleMinChange}
+                className="w-full accent-teal-500"
               />
-              <div className="flex justify-between text-sm text-gray-700 mt-2">
-                <span>Min: {minPrice} €</span>
-                <span>Max: {maxPrice} €</span>
-              </div>
+              <p className="text-sm text-gray-700">Min: {minPrice} €</p>
+              <input
+                type="range"
+                min={prixMin}
+                max={prixMax}
+                value={maxPrice}
+                onChange={handleMaxChange}
+                className="w-full accent-teal-500 mt-2"
+              />
+              <p className="text-sm text-gray-700">Max: {maxPrice} €</p>
             </div>
           </div>
           <div
