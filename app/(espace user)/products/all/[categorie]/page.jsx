@@ -35,13 +35,16 @@ export default function CardsPage() {
     const urlTitles = searchParams.getAll('title');
     const urlSousCategorie = searchParams.get('sousCategorieId');
     const urlPage = searchParams.get('page');
+
+    // Only update state if URL params exist
     if (urlMarques.length > 0) setSelectedMarques(urlMarques);
-    if (urlMinPrice) setMinPrice(parseFloat(urlMinPrice));
-    if (urlMaxPrice) setMaxPrice(parseFloat(urlMaxPrice));
+    if (urlMinPrice) setMinPrice(Math.max(parseFloat(urlMinPrice), prixMin));
+    if (urlMaxPrice) setMaxPrice(Math.min(parseFloat(urlMaxPrice), prixMax));
     if (urlPage) setPage(parseInt(urlPage));
     if (urlTitles.length > 0) setSelectedTitles(urlTitles);
     if (urlSousCategorie) setSelectedSousCategorie(urlSousCategorie);
-  }, []);
+  }, [searchParams]);
+  
   useEffect(() => {
     setMinPrice(prixMin);
     setMaxPrice(prixMax);
