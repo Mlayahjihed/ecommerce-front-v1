@@ -27,20 +27,34 @@ export default function CardsPage() {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [loading, setLoading] = useState(true);
   // Initialiser les états avec les paramètres d'URL
-  useEffect(() => {
-    const urlMarques = searchParams.getAll('marqueId');
-    const urlMinPrice = searchParams.get('minPrice');
-    const urlMaxPrice = searchParams.get('maxPrice');
-    const urlTitles = searchParams.getAll('title');
-    const urlSousCategorie = searchParams.get('sousCategorieId');
-    const urlPage = searchParams.get('page');
-    if (urlMarques.length > 0) setSelectedMarques(urlMarques);
-    if (urlMinPrice) setMinPrice(parseFloat(urlMinPrice));
-    if (urlMaxPrice) setMaxPrice(parseFloat(urlMaxPrice));
-    if (urlPage) setPage(parseInt(urlPage));
-    if (urlTitles.length > 0) setSelectedTitles(urlTitles);
-    if (urlSousCategorie) setSelectedSousCategorie(urlSousCategorie);
-  }, []);
+
+useEffect(() => {
+  const urlMarques = searchParams.getAll('marqueId');
+  const urlMinPrice = searchParams.get('minPrice');
+  const urlMaxPrice = searchParams.get('maxPrice');
+  const urlTitles = searchParams.getAll('title');
+  const urlSousCategorie = searchParams.get('sousCategorieId');
+  const urlPage = searchParams.get('page');
+
+  // Vérifiez si les paramètres existent avant de mettre à jour l'état
+  if (urlMarques.length > 0) {
+    setSelectedMarques(urlMarques);
+  } else {
+    setSelectedMarques([]); // Réinitialiser si absent
+  }
+
+  setMinPrice(urlMinPrice ? Math.max(parseFloat(urlMinPrice), 0) : 0);
+  setMaxPrice(urlMaxPrice ? Math.min(parseFloat(urlMaxPrice), 999999) : 999999);
+  setPage(urlPage ? Math.max(parseInt(urlPage), 1) : 1);
+  
+  if (urlTitles.length > 0) {
+    setSelectedTitles(urlTitles);
+  } else {
+    setSelectedTitles([]);
+  }
+
+  setSelectedSousCategorie(urlSousCategorie || null);
+}, [searchParams]);
 
 
 
