@@ -49,7 +49,7 @@ export default function CardsPage() {
   const fetchData = useCallback(async () => {
     if (!isInitialized) return;
 
-    setLoading(true);
+    
     try {
       const queryParams = new URLSearchParams({
         page: page.toString(),
