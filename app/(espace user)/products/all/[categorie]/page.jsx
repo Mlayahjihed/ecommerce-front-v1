@@ -264,7 +264,7 @@ const handleMinChange = useCallback((e) => {
       </aside>
 
       {/* Mobile Filter Button */}
-      <div className="sm:hidden flex justify-end p-4">
+      <div className=" sm:hidden flex justify-end p-4">
         <button
           onClick={() => setShowMobileFilter(true)}
           className="text-teal-500 hover:text-teal-600"
@@ -275,7 +275,7 @@ const handleMinChange = useCallback((e) => {
 
       {/* Mobile Filter Sidebar */}
       {showMobileFilter && (
-        <div className="fixed inset-0 z-50 flex">
+        <div className=" inset-0 z-50 flex">
           <div className="bg-white w-72 p-4 space-y-6 shadow-md">
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-semibold mt-14  text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600">Filtres</h2>
