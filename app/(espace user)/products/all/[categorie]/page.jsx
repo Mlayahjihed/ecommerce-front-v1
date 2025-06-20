@@ -275,8 +275,8 @@ const handleMinChange = useCallback((e) => {
 
       {/* Mobile Filter Sidebar */}
       {showMobileFilter && (
-        <div className=" inset-0 z-50 flex">
-          <div className="bg-white w-72 p-4 space-y-6 shadow-md">
+        <div className=" fixed inset-0 z-50 flex ">
+          <div className="bg-white w-72 p-4 space-y-6 shadow-md overflow-y-auto max-h-screen">
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-semibold mt-14  text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-indigo-600">Filtres</h2>
               <button onClick={() => setShowMobileFilter(false)}>
