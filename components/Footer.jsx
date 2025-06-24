@@ -10,7 +10,7 @@ const Footer = () => {
   }, []);
 
   const companyInfo = {
-    name: "C2I_SHOP",
+    name: "C2I_SHOPp",
     address: "Msaken,Sousse",
     email: "C2I_SHOP@gmail.com",
     phone: "+216 53 258 794",
