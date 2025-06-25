@@ -54,9 +54,15 @@ export default function Login() {
       if (!response.ok) {
         setLoading(false)
         // Si l'API renvoie des erreurs, les mettre dans errorState
-        setErrorState(result|| {});
+        setErrorState(result || {});
       } else {
-        Cookie.set('token', result.token, {  path: '/' ,expires: 1});
+        Cookie.set('token', result.token, {
+          path: '/',
+          expires: 1, // 1 jour
+          secure: true, // uniquement envoyé via HTTPS
+          sameSite: 'Strict', // empêche l'envoi inter-domaines
+          httpOnly: false // à mettre à true côté serveur (pas accessible via JavaScript)
+        });
         router.push("/admin");
       }
     } catch (error) {
@@ -65,18 +71,18 @@ export default function Login() {
     }
   };
   if (loading) return <div className="min-h-screen bg-white p-6">
-  <div className="max-w-3xl mx-auto">
-  <div className="flex justify-center items-center h-screen">
-      <ClipLoader color="#14b8a6" loading={loading} size={50} />
-  </div>
-  </div>
-  
+    <div className="max-w-3xl mx-auto">
+      <div className="flex justify-center items-center h-screen">
+        <ClipLoader color="#14b8a6" loading={loading} size={50} />
+      </div>
+    </div>
+
   </div>;
   return (
     <section className="flex flex-col md:flex-row h-screen">
       {/* Section gauche */}
       <div className="bg-teal-200 hidden lg:flex w-full h-screen items-center justify-center">
-        <Image src={Logo} alt="Paysage décoratif" width={700} height={700} priority={true}/>
+        <Image src={Logo} alt="Paysage décoratif" width={700} height={700} priority={true} />
       </div>
 
       {/* Section droite */}
@@ -88,7 +94,7 @@ export default function Login() {
             {/* Champ email */}
             <div>
               <label htmlFor="email" className="block text-gray-700">
-                Email 
+                Email
               </label>
               <input
                 type="email"
@@ -145,7 +151,7 @@ export default function Login() {
 
           {/* Lien pour créer un compte */}
           <p className="mt-8">
-          Besoin d'un compte?{" "}
+            Besoin d'un compte?{" "}
             <a
               href="/auth/register"
               className="text-teal-500 hover:text-teal-600 font-semibold"
