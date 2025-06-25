@@ -66,8 +66,8 @@ export default async function ProductPage({ params }) {
             <div className="mb-2 flex items-center gap-3 flex-wrap">
               {product.newprice > 0 ? (
                 <>
-                  <span className="text-sm text-gray-500 line-through">${product.price}</span>
-                  <span className="text-3xl font-bold text-red-600">${product.newprice}</span>
+                  <span className="text-sm text-gray-500 line-through">{product.price}DT</span>
+                  <span className="text-3xl font-bold text-red-600">{product.newprice}DT</span>
                   {product.price > 0 && (
                     <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">
                       {Math.round((1 - product.newprice / product.price) * 100)}% de réduction
