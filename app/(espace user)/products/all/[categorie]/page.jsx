@@ -393,13 +393,9 @@ const handleMinChange = useCallback((e) => {
       {/* Affichage des Produits */}
 <main className="flex-1 p-10">
   {loading2 ? (
-    <div className="min-h-screen bg-white p-6">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex justify-center items-center h-screen">
-            <ClipLoader color="#14b8a6" loading={true} size={50} />
-          </div>
-        </div>
-      </div>
+    <div className="flex justify-center items-center h-64">
+      <ClipLoader color="#14b8a6" loading={true} size={50} />
+    </div>
   ) : (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
