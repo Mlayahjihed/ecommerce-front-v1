@@ -54,6 +54,8 @@ export default function Reset() {
                 setErrorState(result || {});
             } else {
                 setLoading(false)
+                setInputState({password: "",
+        confirm: "",})
                 toast.success("Mot de passe modifié avec succès !",
                     { position: "top-right" }
                 )
