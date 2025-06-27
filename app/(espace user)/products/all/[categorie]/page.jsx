@@ -394,7 +394,7 @@ const handleMinChange = useCallback((e) => {
 <main className="flex-1 p-10">
   {loading2 ? (
     <div className="flex justify-center items-center h-64">
-      <ClipLoader color="#14b8a6" loading={true} size={50} />
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
     </div>
   ) : (
     <>
