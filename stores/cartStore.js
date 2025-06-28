@@ -51,6 +51,7 @@ const useCartStore = create((set, get) => ({
 
     saveCartToLocalStorage(updatedCart);
     set({ cart: updatedCart });
+    return true;
   },
 
   removeFromCart: (id) => {

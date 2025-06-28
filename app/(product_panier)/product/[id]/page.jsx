@@ -87,7 +87,7 @@ export default async function ProductPage({ params }) {
               <FavoriteButton productId={id} />
             </div>
 
-            <Buttonpanier id={id} stock={product.stock} />
+            <Buttonpanier p={product} />
           </div>
         </div>
       </div>
